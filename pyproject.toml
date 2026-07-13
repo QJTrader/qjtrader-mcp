@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qjtrader-mcp"
+dynamic = ["version"]
+description = "Model Context Protocol server for the QJ Trader AI Trading APIs — let an LLM watch Canadian market data and place simulated orders."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "QJ Trader" }]
+keywords = ["mcp", "model-context-protocol", "trading", "market-data", "order-entry", "llm", "claude", "canada"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+dependencies = [
+    "qjtrader>=0.1.0",
+    "mcp>=1.2.0",
+]
+
+[project.urls]
+Homepage = "https://qjtrader.ai"
+Documentation = "https://docs.qjtrader.ai/docs/ai"
+Console = "https://console.qjtrader.ai"
+Source = "https://github.com/QJTrader/qjtrader-python"
+Issues = "https://github.com/QJTrader/qjtrader-python/issues"
+
+[project.scripts]
+qjtrader-mcp = "qjtrader_mcp:main"
+
+[tool.hatch.version]
+path = "src/qjtrader_mcp/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qjtrader_mcp"]
+
+# Local development: resolve `qjtrader` from the sibling SDK checkout until it is
+# published to PyPI. `uv sync` / `uv run` honour this; plain pip users should
+# `pip install -e ../qjtrader-python` first (see README).
+[tool.uv.sources]
+qjtrader = { path = "../qjtrader-python", editable = true }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
