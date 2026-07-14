@@ -28,7 +28,7 @@ Every tool result is prefixed with an environment tag (`[SANDBOX]` / `[LIVE — 
 
 ## Install
 
-Get a free sandbox credential (no approval) at [console.qjtrader.ai](https://console.qjtrader.ai).
+Get a free sandbox credential (no approval) at [gateway.qjtrader.ai](https://gateway.qjtrader.ai).
 
 Once published to PyPI, the zero-install path is:
 

@@ -27,7 +27,7 @@ dependencies = [
 [project.urls]
 Homepage = "https://qjtrader.ai"
 Documentation = "https://docs.qjtrader.ai/docs/ai"
-Console = "https://console.qjtrader.ai"
+Console = "https://gateway.qjtrader.ai"
 Source = "https://github.com/QJTrader/qjtrader-python"
 Issues = "https://github.com/QJTrader/qjtrader-python/issues"
 
