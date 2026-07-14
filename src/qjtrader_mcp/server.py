@@ -395,14 +395,31 @@ async def get_stats(symbol: str, interval: str = "1m",
 @mcp.tool()
 async def get_chain(underlying: str, expiry: str,
                     at: str | None = None) -> dict[str, Any]:
-    """Options chain snapshot for an underlying/expiry (latest, or nearest at/
-    before `at`). Returns per-strike quotes (and IV/greeks as the feed carries
-    them). Read-only."""
+    """Options chain snapshot for an `underlying` at an `expiry` month.
+
+    `expiry` is the expiry MONTH as `YYYYMM` (e.g. "202608" for Aug 2026); the
+    server derives the third-Friday expiry day itself. Common spellings
+    ("2026-08-21", "20260821", "26AUG21") are normalized. Use `list_expiries`
+    to discover valid months. Returns per-strike quotes (and IV/greeks as the
+    feed carries them), latest or nearest at/before `at`. Read-only."""
     try:
         res = await anyio.to_thread.run_sync(
             lambda: _client().chain(underlying, expiry, at))
     except QJError as e:
         return {"tag": _guard.tag(), "note": f"no chain snapshot available ({e})"}
+    return {"tag": _guard.tag(), **res}
+
+
+@mcp.tool()
+async def list_expiries(underlying: str) -> dict[str, Any]:
+    """List the upcoming valid option-chain expiry months for an `underlying`, as
+    `YYYYMM` strings (e.g. "202608"). Pass one of these as the `expiry` to
+    `get_chain` instead of guessing a full date. Read-only."""
+    try:
+        res = await anyio.to_thread.run_sync(
+            lambda: _client().expiries(underlying))
+    except QJError as e:
+        return {"tag": _guard.tag(), "error": str(e)}
     return {"tag": _guard.tag(), **res}
 
 

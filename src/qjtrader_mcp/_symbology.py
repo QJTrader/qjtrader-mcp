@@ -53,11 +53,21 @@ _NAMESPACE = {
 
 _REFERENCE = "https://docs.qjtrader.ai/docs/ai/symbology"
 
+# Option chains are keyed by the expiry MONTH, not a full date: pass `expiry`
+# as YYYYMM (e.g. "202608") to get_chain — the exchange's 3rd-Friday expiry day
+# is derived for you. Use list_expiries to discover valid months.
+_CHAIN_EXPIRY = (
+    "Option chains take an expiry MONTH as YYYYMM (e.g. '202608'); the "
+    "exchange's 3rd-Friday day is derived for you — do not pass a full date. "
+    "Call list_expiries(underlying) to discover valid months."
+)
+
 
 def explain(symbol: str) -> dict[str, Any]:
     """Parse a symbol into its parts and describe them; never raises."""
     raw = (symbol or "").strip()
-    out: dict[str, Any] = {"input": raw, "reference": _REFERENCE}
+    out: dict[str, Any] = {"input": raw, "reference": _REFERENCE,
+                           "chain_expiry": _CHAIN_EXPIRY}
     if not raw:
         out["help"] = (
             "Provide a symbol like 'CA:RY' (Royal Bank consolidated), "

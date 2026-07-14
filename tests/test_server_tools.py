@@ -15,7 +15,8 @@ async def test_all_tools_registered():
         "place_order", "cancel_order", "replace_order", "cancel_all",
         "explain_symbol",
         # v2 research/analytics tools (plan §9.2)
-        "read_events", "get_history", "get_stats", "get_chain", "compare",
+        "read_events", "get_history", "get_stats", "get_chain", "list_expiries",
+        "compare",
         # v2 tier-3 experiment tools (plan §9.2 / §10.4)
         "run_backtest", "set_scenario", "start_paper_run", "run_status", "stop_run",
     } <= names
@@ -60,6 +61,9 @@ class _FakeClient:
         from qjtrader.errors import QJError
         raise QJError("no chain snapshot")
 
+    def expiries(self, underlying):
+        return {"underlying": underlying, "expiries": ["202608", "202609", "202610"]}
+
 
 @pytest.mark.anyio
 async def test_read_events_and_history(monkeypatch):
@@ -91,6 +95,15 @@ async def test_get_chain_missing_returns_note(monkeypatch):
 
     res = await server.get_chain("MX:RY", "202609")
     assert "note" in res and "no chain snapshot" in res["note"]
+
+
+@pytest.mark.anyio
+async def test_list_expiries(monkeypatch):
+    from qjtrader_mcp import server
+    monkeypatch.setattr(server, "_client", lambda: _FakeClient())
+
+    res = await server.list_expiries("MX:RY")
+    assert res["expiries"] == ["202608", "202609", "202610"] and "tag" in res
 
 
 @pytest.mark.anyio
