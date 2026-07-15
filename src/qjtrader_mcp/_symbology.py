@@ -28,7 +28,6 @@ _VENUE = {
     "PT": "PURE — Canadian Securities Exchange (CSE)",
     "AQN": "NEO Exchange (Cboe Canada)",
     "AQL": "Cboe Canada — lit book (Aequitas)",
-    "AQD": "Cboe Canada — dark (Aequitas)",
     "AL": "Alpha",
     "OG": "Omega",
     "CH": "Chi-X Canada",
