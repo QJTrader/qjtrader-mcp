@@ -68,7 +68,12 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+          # A file already on PyPI (manual upload racing CI, or a dispatch
+          # re-run of a partially-uploaded release) is skipped, not a failure.
+          skip-existing: true
 
       - name: Publish (OIDC Trusted Publishing)
         if: steps.mode.outputs.token == 'false'
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
