@@ -1,5 +1,7 @@
 # qjtrader-mcp
 
+> For Claude web, mobile, or another hosted assistant, prefer the hosted QJTrader OAuth connector offered inside [QJ Gateway](https://gateway.qjtrader.ai). It provides delegated per-user access without putting `QJ_CLIENT_SECRET` in chat. This package is the local/stdio implementation for Claude Code and controlled local runtimes.
+
 [![PyPI version](https://img.shields.io/pypi/v/qjtrader-mcp)](https://pypi.org/project/qjtrader-mcp/)
 [![Python versions](https://img.shields.io/pypi/pyversions/qjtrader-mcp)](https://pypi.org/project/qjtrader-mcp/)
 [![License](https://img.shields.io/pypi/l/qjtrader-mcp)](https://github.com/QJTrader/qjtrader-mcp/blob/main/LICENSE)
