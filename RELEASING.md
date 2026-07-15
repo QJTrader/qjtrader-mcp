@@ -16,12 +16,14 @@ with an API-token fallback for when OIDC isn't configured yet. Mirrors the `qjtr
 2. **Create the `pypi` environment** in the GitHub repo (*Settings → Environments → New environment
    → `pypi`*). Optionally add required reviewers so a human approves each release.
 
-**Current setup:** this repo publishes with a scoped `PYPI_API_TOKEN` repo secret (the workflow's
-"Publish (scoped API token)" step; the "Select PyPI credential mode" step logs which credential
-ran). Rotate by overwriting that secret with a fresh **project-scoped** token. To switch to OIDC
-instead, register the trusted publisher on the existing project (see the SDK's RELEASING.md note on
-the pending-vs-existing-project trap), then delete the secret — the workflow auto-switches to its
-"Publish (OIDC Trusted Publishing)" step.
+**Current setup:** OIDC Trusted Publishing (active, no stored secret). The trusted publisher is
+registered on the PyPI project, so each tagged release uploads with **PEP 740 digital attestations**
+(provenance shown on the PyPI project page); the "Select PyPI credential mode" step logs `using OIDC
+Trusted Publishing`. Attestations attach at upload time and can't be added retroactively — only
+newly uploaded versions gain provenance. If OIDC ever breaks, add a project-scoped `PYPI_API_TOKEN`
+repo secret as an emergency fallback (the workflow auto-switches to its "Publish (scoped API token)"
+step); remove it once OIDC is restored. To re-register a lost publisher, add it from the project's
+own *Publishing* page (a pending publisher is ignored once the project exists).
 
 ## Cutting a release
 
