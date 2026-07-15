@@ -4,13 +4,12 @@ name: Publish to PyPI
 # (workflow_dispatch) so a release that failed to upload can be retried
 # without minting a new tag.
 #
-# Auth is resilient by design:
-#   * Preferred — PyPI Trusted Publishing (OIDC), no stored secret. Requires the
-#     one-time PyPI + GitHub-environment setup in RELEASING.md.
-#   * Fallback — if a `PYPI_API_TOKEN` repo secret exists, the publish step uses
-#     it. An unset secret expands to an empty string, which the publish action
-#     treats as "use OIDC" — so this never blocks Trusted Publishing when it's
-#     configured, and unblocks releases when it isn't.
+# Credential: the repo has a scoped `PYPI_API_TOKEN` secret configured, so the
+# publish step authenticates with it (the "Publish (scoped API token)" step
+# runs). If that secret is ever removed, the job automatically switches to PyPI
+# Trusted Publishing (OIDC) instead - see RELEASING.md for the one-time PyPI +
+# GitHub-environment setup that path needs. Exactly one of the two publish
+# steps runs, and the "Select PyPI credential mode" step logs which.
 
 on:
   push:
@@ -43,13 +42,33 @@ jobs:
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
-      id-token: write # required for Trusted Publishing (OIDC)
+      id-token: write # required for the OIDC Trusted Publishing fallback
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
-      - uses: pypa/gh-action-pypi-publish@release/v1
+
+      # Secrets can be read in `env:` but not in `if:`, so bridge the token's
+      # presence through a step output (this never exposes the value).
+      - name: Select PyPI credential mode
+        id: mode
+        env:
+          HAS_TOKEN: ${{ secrets.PYPI_API_TOKEN != '' }}
+        run: |
+          echo "token=$HAS_TOKEN" >> "$GITHUB_OUTPUT"
+          if [ "$HAS_TOKEN" = "true" ]; then
+            echo "::notice::Publishing with the scoped PYPI_API_TOKEN repo secret."
+          else
+            echo "::notice::No PYPI_API_TOKEN set - using OIDC Trusted Publishing."
+          fi
+
+      - name: Publish (scoped API token)
+        if: steps.mode.outputs.token == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          # Empty when the secret is unset -> action uses Trusted Publishing.
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Publish (OIDC Trusted Publishing)
+        if: steps.mode.outputs.token == 'false'
+        uses: pypa/gh-action-pypi-publish@release/v1
