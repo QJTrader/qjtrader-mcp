@@ -1,5 +1,9 @@
 # qjtrader-mcp
 
+[![PyPI version](https://img.shields.io/pypi/v/qjtrader-mcp)](https://pypi.org/project/qjtrader-mcp/)
+[![Python versions](https://img.shields.io/pypi/pyversions/qjtrader-mcp)](https://pypi.org/project/qjtrader-mcp/)
+[![License](https://img.shields.io/pypi/l/qjtrader-mcp)](https://github.com/QJTrader/qjtrader-mcp/blob/main/LICENSE)
+
 **Model Context Protocol server for the [QJ Trader](https://qjtrader.ai) AI Trading APIs.**
 Point your LLM at your QJ credential and it can watch live Canadian market data and place
 **simulated** orders — no code, no manual API testing.
@@ -9,6 +13,12 @@ it from Claude Code, Claude Desktop, or any MCP-capable client:
 
 > *"Subscribe to CA:RY and MX:CRAU26, show me the books, then buy 1 CRAU26 at 97 in the sandbox
 > and tell me the fill."*
+
+> **Verifiable releases.** `qjtrader-mcp` is published straight from this repository via [PyPI Trusted
+> Publishing](https://docs.pypi.org/trusted-publishers/) with signed [PEP 740](https://peps.python.org/pep-0740/)
+> provenance — no manual uploads, no stored tokens. Before you let an agent install it, you (or the agent)
+> can confirm each release was built by `QJTrader/qjtrader-mcp` from the **Provenance** section on
+> [PyPI](https://pypi.org/project/qjtrader-mcp/). See [SECURITY.md](SECURITY.md).
 
 ## Safety model — AI trades simulated by default
 

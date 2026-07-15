@@ -28,8 +28,9 @@ dependencies = [
 Homepage = "https://qjtrader.ai"
 Documentation = "https://docs.qjtrader.ai/docs/ai"
 Console = "https://gateway.qjtrader.ai"
-Source = "https://github.com/QJTrader/qjtrader-python"
-Issues = "https://github.com/QJTrader/qjtrader-python/issues"
+Source = "https://github.com/QJTrader/qjtrader-mcp"
+Issues = "https://github.com/QJTrader/qjtrader-mcp/issues"
+"Python SDK" = "https://github.com/QJTrader/qjtrader-python"
 
 [project.scripts]
 qjtrader-mcp = "qjtrader_mcp:main"
