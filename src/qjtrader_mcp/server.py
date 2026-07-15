@@ -190,11 +190,11 @@ async def watch(symbols: list[str], seconds: float = 10.0,
 
 # --------------------------------------------------------------- order tools
 def _blocking_place(sym: str, side: str, qty: int, price: float,
-                    account: str, tif: str) -> dict[str, Any]:
+                    account: str, tif: str, venue: str | None) -> dict[str, Any]:
     with _client().orders() as oe:
         user = oe.user
         result = oe.order_and_wait(sym=sym, side=side, qty=qty, price=price,
-                                   account=account, tif=tif)
+                                   account=account, tif=tif, venue=venue)
     return {"user": user, "result": result}
 
 
@@ -240,10 +240,12 @@ def _blocking_status() -> dict[str, Any]:
 
 @mcp.tool()
 async def place_order(sym: str, side: str, qty: int, price: float,
-                      account: str = "SIM", tif: str = "day") -> dict[str, Any]:
+                      account: str = "SIM", tif: str = "day",
+                      venue: str | None = None) -> dict[str, Any]:
     """Submit a limit order and wait for it to reach a terminal state.
 
-    side: "buy" | "sell".  tif: "day" | "ioc" | "fok".  Returns the final
+    side: "buy" | "sell".  tif: "day" | "ioc" | "fok".  ``venue`` selects a
+    Canadian equity route (for example TO, PT, LY, TL, SOR, or DARK). Returns the final
     execution/order message (a fill, cancel, reject, or the resting order if it
     is still open after a short wait).
 
@@ -269,7 +271,7 @@ async def place_order(sym: str, side: str, qty: int, price: float,
         return {"tag": _guard.tag(), "error": "price must be > 0"}
     try:
         res = await anyio.to_thread.run_sync(
-            _blocking_place, sym, side, qty, price, account, tif)
+            _blocking_place, sym, side, qty, price, account, tif, venue)
     except QJError as e:
         return {"tag": _guard.tag(), "error": str(e)}
     res["tag"] = _guard.tag()
