@@ -92,6 +92,7 @@ The console's "Connect your AI" panel generates these blocks pre-filled, includi
 | `get_depth` | read | Level-2 order book for a symbol (venue-tagged on consolidated books) |
 | `watch` | read | Sample the live stream for a bounded window; returns a digest + last messages |
 | `list_orders` | read | Open orders + session state |
+| `get_positions` | read | Broker-truth positions (broker + fill = total), risk envelope + admserv hard caps, capital-required, order plane |
 | `place_order` | write | Submit a limit order and wait for a terminal state |
 | `cancel_order` | write | Cancel a working order by `cid` |
 | `replace_order` | write | Amend a working order's qty/price |

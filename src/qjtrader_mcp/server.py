@@ -361,6 +361,34 @@ async def read_events(since: str | None = None, limit: int = 200) -> dict[str, A
 
 
 @mcp.tool()
+async def get_positions() -> dict[str, Any]:
+    """Where this credential stands: broker-truth positions, risk envelope, and plane.
+
+    The supervision counterpart to `list_orders` (which shows *working* orders):
+    this shows what you actually *hold* and what you're *allowed* to hold.
+
+    - `positions` — flat fill-only net per symbol (today's fills this session).
+    - `positions_detail` — per canonical symbol, `{broker_qty, fill_qty, total_qty}`,
+      i.e. `TotalVolume = InitVolume (broker start-of-day) + NetVolume (today's fills)`.
+      This is the number that matters for "how exposed am I right now".
+    - `envelope` / `admserv_limits` — the caps an order is checked against; admserv
+      limits are the hard broker-sourced floor/ceiling (an order projecting past them
+      is rejected before it transmits).
+    - `capital_required` — margin the current futures book ties up.
+    - `orders_env` — the order plane (`sandbox`/`paper`/`shadow`/`real`). On a
+      simulated plane there is no broker book: `positions_detail` is fill-only
+      (`broker_qty` 0) and the admserv/capital fields are omitted — by design.
+
+    Read-only; works in every environment.
+    """
+    try:
+        res = await anyio.to_thread.run_sync(lambda: _client().positions())
+    except QJError as e:
+        return {"tag": _guard.tag(), "error": str(e)}
+    return {"tag": _guard.tag(), **res}
+
+
+@mcp.tool()
 async def get_history(symbol: str, interval: str = "1m", start: str | None = None,
                       end: str | None = None, limit: int = 500) -> dict[str, Any]:
     """Historical OHLCV bars for a symbol (interval "1s" or "1m").
