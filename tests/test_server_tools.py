@@ -11,7 +11,7 @@ async def test_all_tools_registered():
 
     names = {t.name for t in await server.mcp.list_tools()}
     assert {
-        "session_info", "get_quote", "get_depth", "watch", "list_orders",
+        "session_info", "market_availability", "get_quote", "get_depth", "watch", "list_orders",
         "place_order", "cancel_order", "replace_order", "cancel_all",
         "explain_symbol",
         # v2 research/analytics tools (plan §9.2)
@@ -20,6 +20,14 @@ async def test_all_tools_registered():
         # v2 tier-3 experiment tools (plan §9.2 / §10.4)
         "run_backtest", "set_scenario", "start_paper_run", "run_status", "stop_run",
     } <= names
+
+
+@pytest.mark.anyio
+async def test_market_availability_is_offline_and_describes_us_limits():
+    from qjtrader_mcp import server
+    res = await server.market_availability()
+    assert res["markets"]["US"]["limitations"]
+    assert "tag" in res
 
 
 @pytest.mark.anyio

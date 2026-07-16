@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "qjtrader-mcp"
 dynamic = ["version"]
-description = "Model Context Protocol server for the QJ Trader AI Trading APIs — let an LLM watch Canadian market data and place simulated orders."
+description = "MCP server for QJ Trader — let an LLM inspect availability, watch Canadian and selected US data, and place simulated orders."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }

@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/pypi/l/qjtrader-mcp)](https://github.com/QJTrader/qjtrader-mcp/blob/main/LICENSE)
 
 **Model Context Protocol server for the [QJ Trader](https://qjtrader.ai) AI Trading APIs.**
-Point your LLM at your QJ credential and it can watch live Canadian market data and place
+Point your LLM at your QJ credential and it can watch live Canadian and selected US market data and place
 **simulated** orders — no code, no manual API testing.
 
 Built on the official [`qjtrader`](https://github.com/QJTrader/qjtrader-python) Python SDK. Talk to
@@ -100,6 +100,7 @@ The console's "Connect your AI" panel generates these blocks pre-filled, includi
 | Tool | Kind | Description |
 |---|---|---|
 | `session_info` | read | Environment, whether order actions are allowed, endpoints, authenticated user. **Call first.** |
+| `market_availability` | read, offline | Current CA/MX/US data and order support, verified examples, and known gaps. **Call before assuming a product has depth.** |
 | `get_quote` | read | Top-of-book (best bid/ask) for one or more symbols |
 | `get_depth` | read | Level-2 order book for a symbol (venue-tagged on consolidated books) |
 | `watch` | read | Sample the live stream for a bounded window; returns a digest + last messages |

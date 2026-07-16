@@ -43,6 +43,8 @@ mcp = FastMCP(
         "`read_events`) to analyse the market and debug strategies; order actions "
         "run against a SANDBOX credential by default (simulated fills). Always "
         "check `session_info` first to see which environment you are in. Symbols "
+        "have product-specific availability: call `market_availability` before "
+        "assuming a quote or depth book exists. Symbols "
         "are namespaced (e.g. CA:RY, CA:RY.PT, MX:CRAU26) — call `explain_symbol` "
         "if unsure. Prefer digests (`get_stats`) over raw dumps. Every result "
         "begins with an environment tag."
@@ -134,6 +136,20 @@ def _blocking_watch(symbols: list[str], seconds: float, limit: int) -> dict[str,
 
 
 # ----------------------------------------------------------------- data tools
+@mcp.tool()
+async def market_availability() -> dict[str, Any]:
+    """Return the current market-data and order-entry support matrix.
+
+    Call this before interpreting a silent subscription as an error. It lists
+    verified CA/MX/US capabilities and known product-specific limitations,
+    including symbol-dependent US depth. This tool is offline and needs no
+    network connection or credential.
+    """
+    result = qjtrader.market_availability()
+    result["tag"] = _guard.tag()
+    return result
+
+
 @mcp.tool()
 async def get_quote(symbols: list[str], seconds: float = 4.0) -> dict[str, Any]:
     """Get the current top-of-book (best bid/ask) for one or more symbols.
