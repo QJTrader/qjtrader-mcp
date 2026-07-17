@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1
+
+- Requires `qjtrader>=0.5.1`, allowing server-authoritative mutation checks to work correctly for
+  an orders-only credential while still failing closed when order authority itself is unavailable.
+
 ## 0.4.0
 
 - Mutation guards now trust the Gateway's authenticated order environment and authority version,
