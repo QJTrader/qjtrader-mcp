@@ -45,7 +45,7 @@ mcp = FastMCP(
         "check `session_info` first to see which environment you are in. Symbols "
         "have product-specific availability: call `market_availability` before "
         "assuming a quote or depth book exists. Symbols "
-        "are namespaced (e.g. CA:RY, CA:RY.PT, MX:CRAU26) — call `explain_symbol` "
+        "are namespaced (e.g. CA:RY, MX:CRAU26, US:SPY, US:@ESU26) — call `explain_symbol` "
         "if unsure. Prefer digests (`get_stats`) over raw dumps. Every result "
         "begins with an environment tag."
     ),
@@ -154,7 +154,7 @@ async def market_availability() -> dict[str, Any]:
 async def get_quote(symbols: list[str], seconds: float = 4.0) -> dict[str, Any]:
     """Get the current top-of-book (best bid/ask) for one or more symbols.
 
-    Symbols are namespaced, e.g. ["CA:RY", "CA:RY.PT", "MX:CRAU26"]. This opens a
+    Symbols are namespaced, e.g. ["CA:RY", "MX:CRAU26", "US:@ESU26"]. This opens a
     short market-data subscription and returns the latest book seen within
     `seconds`. Symbols with no data in that window are listed under "missing"
     (they may be untraded, misspelled, or outside the sandbox's synthetic set).

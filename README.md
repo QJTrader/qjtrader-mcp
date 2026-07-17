@@ -13,8 +13,8 @@ Point your LLM at your QJ credential and it can watch live Canadian and selected
 Built on the official [`qjtrader`](https://github.com/QJTrader/qjtrader-python) Python SDK. Talk to
 it from Claude Code, Claude Desktop, or any MCP-capable client:
 
-> *"Subscribe to CA:RY and MX:CRAU26, show me the books, then buy 1 CRAU26 at 97 in the sandbox
-> and tell me the fill."*
+> *"Check market availability, then compare CA:RY, MX:CRAU26, and US:@ESU26 in the sandbox.
+> Show the books and explain which production permissions would be separate."*
 
 > **Verifiable releases.** `qjtrader-mcp` is published straight from this repository via [PyPI Trusted
 > Publishing](https://docs.pypi.org/trusted-publishers/) with signed [PEP 740](https://peps.python.org/pep-0740/)
@@ -42,13 +42,13 @@ Every tool result is prefixed with an environment tag (`[SANDBOX]` / `[LIVE — 
 
 Get a free sandbox credential (no approval) at [gateway.qjtrader.ai](https://gateway.qjtrader.ai).
 
-Once published to PyPI, the zero-install path is:
+The zero-install path is:
 
 ```bash
 uvx qjtrader-mcp        # or: pipx run qjtrader-mcp
 ```
 
-Until then (or for local development against the SDK checkout):
+For local development against the SDK checkout:
 
 ```bash
 # from the qjtrader-mcp/ directory, with the qjtrader-python sibling checked out:

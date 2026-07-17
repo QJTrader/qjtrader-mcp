@@ -4,7 +4,7 @@ Mirrors the public symbology reference (https://docs.qjtrader.ai/docs/ai/symbolo
 so an agent can name instruments without a round-trip. A QJ symbol is a
 security-type prefix (derivatives only), a root, and an exchange suffix. The
 cloud market-data/order APIs also accept a namespace form used in the SDK
-examples: ``CA:RY``, ``CA:RY.PT``, ``MX:CRAU26``.
+examples: ``CA:RY``, ``MX:CRAU26``, ``US:SPY``, ``US:@ESU26``.
 """
 from __future__ import annotations
 
@@ -73,7 +73,8 @@ def explain(symbol: str) -> dict[str, Any]:
     if not raw:
         out["help"] = (
             "Provide a symbol like 'CA:RY' (Royal Bank consolidated), "
-            "'CA:RY.PT' (on PURE/CSE), or 'MX:CRAU26' (a Montréal future). "
+            "'CA:RY.PT' (on PURE/CSE), 'MX:CRAU26' (a Montréal future), "
+            "or 'US:@ESU26' (a selected US future). "
             "Format: [namespace:] [type-prefix] ROOT [.VENUE]."
         )
         out["namespaces"] = _NAMESPACE
