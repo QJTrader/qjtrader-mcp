@@ -100,7 +100,7 @@ The console's "Connect your AI" panel generates these blocks pre-filled, includi
 | Tool | Kind | Description |
 |---|---|---|
 | `session_info` | read | Environment, whether order actions are allowed, endpoints, authenticated user. **Call first.** |
-| `market_availability` | read, offline | Current CA/MX/US data and order support, verified examples, and known gaps. **Call before assuming a product has depth.** |
+| `market_availability` | read, offline | Product-by-product sandbox vs production data/order support, verified examples, and known gaps. **Call before assuming a product has depth or order authority.** |
 | `get_quote` | read | Top-of-book (best bid/ask) for one or more symbols |
 | `get_depth` | read | Level-2 order book for a symbol (venue-tagged on consolidated books) |
 | `watch` | read | Sample the live stream for a bounded window; returns a digest + last messages |
