@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.4.2
 
 - Added payload-shape and observation-honesty guidance to `market_availability`
   and `describe_instrument`, including sparse/unquoted states and optional depth fields.
