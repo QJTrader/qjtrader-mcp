@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Added payload-shape and observation-honesty guidance to `market_availability`
+  and `describe_instrument`, including sparse/unquoted states and optional depth fields.
+
 ## 0.4.1
 
 - Requires `qjtrader>=0.5.1`, allowing server-authoritative mutation checks to work correctly for

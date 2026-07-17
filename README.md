@@ -103,8 +103,14 @@ The console's "Connect your AI" panel generates these blocks pre-filled, includi
 |---|---|---|
 | `session_info` | read | Environment, whether order actions are allowed, endpoints, authenticated user. **Call first.** |
 | `market_availability` | read, offline | Product-by-product sandbox vs production data/order support, verified examples, and known gaps. **Call before assuming a product has depth or order authority.** |
+| `request_production_access` | human handoff | Builds a secret-free Gateway URL for a least-privilege request. It cannot approve, provision, promote, or reveal a key. |
 | `search_universe` | read | Search current symbol forms and capability metadata by market or text |
 | `describe_instrument` | read | Describe one symbol, its product identity, venue scope, and available operations |
+
+`market_availability` also returns an `observation_contract` and source-aware
+`data_shapes`. Agents must preserve `null` or silence as "unquoted now," treat
+`orders`/`venues` on depth levels as optional, and never infer Greeks, NAV,
+contract terms, depth, or order authority from the security type alone.
 | `get_quote` | read | Top-of-book (best bid/ask) for one or more symbols |
 | `get_depth` | read | Level-2 order book for a symbol (venue-tagged on consolidated books) |
 | `watch` | read | Sample the live stream for a bounded window; returns a digest + last messages |
