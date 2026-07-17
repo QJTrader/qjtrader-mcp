@@ -24,19 +24,21 @@ it from Claude Code, Claude Desktop, or any MCP-capable client:
 
 ## Safety model — AI trades simulated by default
 
-Order-mutating tools (`place_order`, `cancel_order`, `replace_order`, `cancel_all`) run against a
-**sandbox** credential by default and return simulated fills. A **live** credential is refused
-unless you explicitly opt in. The server never sniffs this off the wire (the protocol doesn't
-expose it) — you declare it:
+Order-mutating tools (`place_order`, `cancel_order`, `replace_order`, `cancel_all`) use the
+Gateway's authenticated session response as the authority. Sandbox, paper, and shadow credentials
+cannot be mistaken for live credentials by a stale local setting. Canary and live credentials are
+refused unless you explicitly opt in.
 
-| `QJ_ENV` | Read tools (quotes/depth/status) | Order tools |
+| Server-declared order environment | Read tools (quotes/depth/status) | Order tools |
 |---|---|---|
 | `sandbox` | ✅ | ✅ simulated |
-| `live` | ✅ | ⛔ unless `QJ_MCP_ALLOW_LIVE=1` |
-| *(unset)* | ✅ | ⛔ (fail-safe: unknown is treated as live) |
+| `paper` / `shadow` | ✅ | ✅ non-exchange mutation path |
+| `canary` / `live` | ✅ | ⛔ unless `QJ_MCP_ALLOW_LIVE=1` |
+| unavailable or mismatched | ✅ where possible | ⛔ fail closed |
 
-Every tool result is prefixed with an environment tag (`[SANDBOX]` / `[LIVE — REAL MONEY]` /
-`[ENV UNKNOWN]`), and order quantity is capped client-side by `QJ_MCP_MAX_QTY` (default 25).
+`QJ_ENV` is now an optional expected-environment assertion, not the source of truth. If it disagrees
+with the Gateway, mutations stop with an explanation. Every tool result includes an environment tag,
+and order quantity is capped client-side by `QJ_MCP_MAX_QTY` (default 25).
 
 ## Install
 
@@ -101,6 +103,8 @@ The console's "Connect your AI" panel generates these blocks pre-filled, includi
 |---|---|---|
 | `session_info` | read | Environment, whether order actions are allowed, endpoints, authenticated user. **Call first.** |
 | `market_availability` | read, offline | Product-by-product sandbox vs production data/order support, verified examples, and known gaps. **Call before assuming a product has depth or order authority.** |
+| `search_universe` | read | Search current symbol forms and capability metadata by market or text |
+| `describe_instrument` | read | Describe one symbol, its product identity, venue scope, and available operations |
 | `get_quote` | read | Top-of-book (best bid/ask) for one or more symbols |
 | `get_depth` | read | Level-2 order book for a symbol (venue-tagged on consolidated books) |
 | `watch` | read | Sample the live stream for a bounded window; returns a digest + last messages |
@@ -125,7 +129,7 @@ market and debug the strategy it wrote, without touching the production order pa
 | Env var | Purpose | Default |
 |---|---|---|
 | `QJ_CLIENT_ID` / `QJ_CLIENT_SECRET` | credential | — (required) |
-| `QJ_ENV` | `sandbox` \| `live` — declares the environment | unset → treated as live |
+| `QJ_ENV` | Optional expected environment; mismatch refuses mutations | unset |
 | `QJ_MCP_ALLOW_LIVE` | set `1` to authorize live order actions | off |
 | `QJ_MCP_MAX_QTY` | client-side max order quantity | `25` |
 | `QJ_DATA_HOST` / `QJ_ORDERS_HOST` | endpoint overrides | public QJ hosts |

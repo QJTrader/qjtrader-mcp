@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0
+
+- Mutation guards now trust the Gateway's authenticated order environment and authority version,
+  not a local `QJ_ENV` declaration. Missing authority or a declaration mismatch fails closed.
+- Added `search_universe` and `describe_instrument` tools for agent-readable product discovery.
+- Local quantity and input errors remain immediate; any valid mutation still requires confirmed
+  server authority, with explicit opt-in for canary and live credentials.
+
 ## 0.3.4
 
 - Requires `qjtrader>=0.4.3` and exposes its product-by-product sandbox versus production

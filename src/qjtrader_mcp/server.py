@@ -58,6 +58,23 @@ def _client() -> qjtrader.Client:
     return qjtrader.Client()
 
 
+async def _server_session() -> dict[str, Any]:
+    """Resolve both environments from the authenticated server handshakes."""
+    return await anyio.to_thread.run_sync(lambda: _client().session_info())
+
+
+async def _order_guard() -> tuple[bool, str, str, dict[str, Any]]:
+    """Authoritative mutation guard; local QJ_ENV can only make it stricter."""
+    try:
+        session = await _server_session()
+    except (QJError, OSError) as e:
+        reason = f"Could not confirm the server order environment; mutation refused: {e}"
+        return False, reason, _guard.tag(), {}
+    env = str(session.get("orders_environment") or "unknown")
+    ok, reason = _guard.mutations_allowed(env)
+    return ok, reason, _guard.tag(env), session
+
+
 def _top_of_book(msg: dict[str, Any]) -> dict[str, Any]:
     """Best bid/ask from a snapshot or quote message, defensively."""
     data = msg.get("data") or {}
@@ -269,28 +286,31 @@ async def place_order(sym: str, side: str, qty: int, price: float,
     A live credential is refused unless QJ_MCP_ALLOW_LIVE=1 is set. Quantity is
     capped client-side by QJ_MCP_MAX_QTY (default 25).
     """
-    ok, reason = _guard.mutations_allowed()
-    if not ok:
-        return {"tag": _guard.tag(), "refused": True, "reason": reason}
+    # Explain deterministic local input failures before opening a connection.
+    # Any order that survives these checks is still gated by server authority below.
+    local_tag = _guard.tag()
     if side not in ("buy", "sell"):
-        return {"tag": _guard.tag(), "error": "side must be 'buy' or 'sell'"}
+        return {"tag": local_tag, "error": "side must be 'buy' or 'sell'"}
     if tif not in ("day", "ioc", "fok"):
-        return {"tag": _guard.tag(), "error": "tif must be 'day', 'ioc', or 'fok'"}
+        return {"tag": local_tag, "error": "tif must be 'day', 'ioc', or 'fok'"}
     if qty < 1:
-        return {"tag": _guard.tag(), "error": "qty must be >= 1"}
+        return {"tag": local_tag, "error": "qty must be >= 1"}
     cap = _guard.max_qty()
     if qty > cap:
-        return {"tag": _guard.tag(), "refused": True,
+        return {"tag": local_tag, "refused": True,
                 "reason": f"qty {qty} exceeds the client-side cap of {cap} "
                           f"(raise QJ_MCP_MAX_QTY to allow larger orders)"}
     if price <= 0:
-        return {"tag": _guard.tag(), "error": "price must be > 0"}
+        return {"tag": local_tag, "error": "price must be > 0"}
+    ok, reason, env_tag, _session = await _order_guard()
+    if not ok:
+        return {"tag": env_tag, "refused": True, "reason": reason}
     try:
         res = await anyio.to_thread.run_sync(
             _blocking_place, sym, side, qty, price, account, tif, venue)
     except QJError as e:
-        return {"tag": _guard.tag(), "error": str(e)}
-    res["tag"] = _guard.tag()
+        return {"tag": env_tag, "error": str(e)}
+    res["tag"] = env_tag
     res["allowed_because"] = reason
     return res
 
@@ -298,14 +318,14 @@ async def place_order(sym: str, side: str, qty: int, price: float,
 @mcp.tool()
 async def cancel_order(orig_cid: str) -> dict[str, Any]:
     """Cancel a working order by its client order id (cid)."""
-    ok, reason = _guard.mutations_allowed()
+    ok, reason, env_tag, _session = await _order_guard()
     if not ok:
-        return {"tag": _guard.tag(), "refused": True, "reason": reason}
+        return {"tag": env_tag, "refused": True, "reason": reason}
     try:
         res = await anyio.to_thread.run_sync(_blocking_cancel, orig_cid)
     except QJError as e:
-        return {"tag": _guard.tag(), "error": str(e)}
-    res["tag"] = _guard.tag()
+        return {"tag": env_tag, "error": str(e)}
+    res["tag"] = env_tag
     return res
 
 
@@ -313,39 +333,39 @@ async def cancel_order(orig_cid: str) -> dict[str, Any]:
 async def replace_order(orig_cid: str, qty: int | None = None,
                         price: float | None = None) -> dict[str, Any]:
     """Amend a working order's quantity and/or price by its client order id."""
-    ok, reason = _guard.mutations_allowed()
+    ok, reason, env_tag, _session = await _order_guard()
     if not ok:
-        return {"tag": _guard.tag(), "refused": True, "reason": reason}
+        return {"tag": env_tag, "refused": True, "reason": reason}
     if qty is None and price is None:
-        return {"tag": _guard.tag(), "error": "provide qty and/or price to change"}
+        return {"tag": env_tag, "error": "provide qty and/or price to change"}
     if qty is not None:
         if qty < 1:
-            return {"tag": _guard.tag(), "error": "qty must be >= 1"}
+            return {"tag": env_tag, "error": "qty must be >= 1"}
         cap = _guard.max_qty()
         if qty > cap:
-            return {"tag": _guard.tag(), "refused": True,
+            return {"tag": env_tag, "refused": True,
                     "reason": f"qty {qty} exceeds the client-side cap of {cap}"}
     if price is not None and price <= 0:
-        return {"tag": _guard.tag(), "error": "price must be > 0"}
+        return {"tag": env_tag, "error": "price must be > 0"}
     try:
         res = await anyio.to_thread.run_sync(_blocking_replace, orig_cid, qty, price)
     except QJError as e:
-        return {"tag": _guard.tag(), "error": str(e)}
-    res["tag"] = _guard.tag()
+        return {"tag": env_tag, "error": str(e)}
+    res["tag"] = env_tag
     return res
 
 
 @mcp.tool()
 async def cancel_all() -> dict[str, Any]:
     """Cancel every working order on this credential (the kill switch)."""
-    ok, reason = _guard.mutations_allowed()
+    ok, reason, env_tag, _session = await _order_guard()
     if not ok:
-        return {"tag": _guard.tag(), "refused": True, "reason": reason}
+        return {"tag": env_tag, "refused": True, "reason": reason}
     try:
         res = await anyio.to_thread.run_sync(_blocking_cancel_all)
     except QJError as e:
-        return {"tag": _guard.tag(), "error": str(e)}
-    res["tag"] = _guard.tag()
+        return {"tag": env_tag, "error": str(e)}
+    res["tag"] = env_tag
     return res
 
 
@@ -557,15 +577,22 @@ async def set_scenario(name: str, symbol: str | None = None,
     """Inject a scripted market scenario into the SANDBOX feed and watch a strategy
     cope: "halt", "fast" (fast market), "gap", or "normal". Sandbox only — refused
     elsewhere. Stress-test your own code without waiting for a real fast market."""
-    if _guard.environment() != "sandbox":
+    try:
+        session = await _server_session()
+    except (QJError, OSError) as e:
         return {"tag": _guard.tag(), "refused": True,
-                "reason": "scenarios are sandbox-only"}
+                "reason": f"could not confirm the server data environment: {e}"}
+    data_env = str(session.get("data_environment") or "unknown")
+    data_tag = _guard.tag(data_env)
+    if data_env != "sandbox" or _guard.declaration_mismatch(data_env):
+        return {"tag": data_tag, "refused": True,
+                "reason": "scenarios require a server-confirmed sandbox data environment"}
     try:
         res = await anyio.to_thread.run_sync(
             lambda: _client().set_scenario(name, symbol, seconds))
     except QJError as e:
-        return {"tag": _guard.tag(), "error": str(e)}
-    return {"tag": _guard.tag(), **res}
+        return {"tag": data_tag, "error": str(e)}
+    return {"tag": data_tag, **res}
 
 
 @mcp.tool()
@@ -575,9 +602,9 @@ async def start_paper_run(symbol: str, auto_tool: str = "scalper",
     """Start a strategy running unattended against this credential (paper = zero
     risk). Returns a run id; poll `run_status` and stop with `stop_run`. Refused on
     a live credential unless order actions are enabled (the arming flow, §6.4)."""
-    ok, reason = _guard.mutations_allowed()
+    ok, reason, env_tag, _session = await _order_guard()
     if not ok:
-        return {"tag": _guard.tag(), "refused": True, "reason": reason}
+        return {"tag": env_tag, "refused": True, "reason": reason}
 
     def _start() -> dict[str, Any]:
         import qjtrader
@@ -592,8 +619,8 @@ async def start_paper_run(symbol: str, auto_tool: str = "scalper",
     try:
         res = await anyio.to_thread.run_sync(_start)
     except (QJError, KeyError, FileNotFoundError) as e:
-        return {"tag": _guard.tag(), "error": str(e)}
-    return {"tag": _guard.tag(), **res}
+        return {"tag": env_tag, "error": str(e)}
+    return {"tag": env_tag, **res}
 
 
 @mcp.tool()
@@ -610,6 +637,26 @@ async def stop_run(run_id: str) -> dict[str, Any]:
 
 # --------------------------------------------------------------- meta tools
 @mcp.tool()
+async def search_universe(query: str = "", limit: int = 50) -> dict[str, Any]:
+    """Search instruments visible to this credential and return capability-aware descriptions."""
+    try:
+        result = await anyio.to_thread.run_sync(lambda: _client().search_universe(query, limit))
+    except (QJError, OSError) as e:
+        return {"tag": _guard.tag(), "error": str(e)}
+    return {"tag": _guard.tag(str(result.get("orders_environment") or "unknown")), **result}
+
+
+@mcp.tool()
+async def describe_instrument(symbol: str) -> dict[str, Any]:
+    """Explain one QJ symbol in the context of this credential's current authority."""
+    try:
+        result = await anyio.to_thread.run_sync(lambda: _client().describe_instrument(symbol))
+    except (QJError, OSError) as e:
+        return {"tag": _guard.tag(), "error": str(e)}
+    return {"tag": _guard.tag(str(result.get("orders_environment") or "unknown")), **result}
+
+
+@mcp.tool()
 def explain_symbol(symbol: str) -> dict[str, Any]:
     """Explain a QJ symbol (or how to build one): asset-class prefix, root, and
     venue suffix, plus consolidated-vs-venue semantics. Use this before
@@ -621,29 +668,34 @@ def explain_symbol(symbol: str) -> dict[str, Any]:
 async def session_info() -> dict[str, Any]:
     """Report the current environment, whether live order actions are enabled,
     the endpoints in use, and the authenticated principal. Call this first."""
-    env = _guard.environment()
-    allowed, reason = _guard.mutations_allowed()
+    declared = _guard.environment()
     info: dict[str, Any] = {
-        "tag": _guard.tag(),
-        "environment": env,
-        "order_actions_allowed": allowed,
-        "order_actions_note": reason,
+        "declared_environment": declared,
         "allow_live_flag": _guard.allow_live(),
         "max_qty": _guard.max_qty(),
         "data_host": os.environ.get("QJ_DATA_HOST", "data-feed.qjtrader.ai"),
         "orders_host": os.environ.get("QJ_ORDERS_HOST", "orders.qjtrader.ai"),
     }
-    # Best-effort auth to confirm the credential works and report the principal.
+    # Server truth is mandatory for mutation safety, but session_info remains
+    # useful when credentials or a service are misconfigured.
     try:
         client = _client()
     except QJError as e:
         info["credential"] = f"not configured: {e}"
         return info
     try:
-        info["authenticated_user"] = await anyio.to_thread.run_sync(
-            lambda: _auth_probe(client))
-    except QJError as e:
-        info["authenticated_user"] = f"auth failed: {e}"
+        session = await anyio.to_thread.run_sync(client.session_info)
+        info.update(session)
+        orders_env = str(session.get("orders_environment") or "unknown")
+        allowed, reason = _guard.mutations_allowed(orders_env)
+        info["tag"] = _guard.tag(orders_env)
+        info["order_actions_allowed"] = allowed
+        info["order_actions_note"] = reason
+        info["environment_mismatch"] = _guard.declaration_mismatch(orders_env)
+    except (QJError, OSError) as e:
+        info["tag"] = _guard.tag()
+        info["order_actions_allowed"] = False
+        info["order_actions_note"] = f"server environment unavailable; mutations refused: {e}"
     return info
 
 
