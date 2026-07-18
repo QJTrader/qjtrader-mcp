@@ -28,6 +28,8 @@ async def test_market_availability_is_offline_and_describes_us_limits():
     from qjtrader_mcp import server
     res = await server.market_availability()
     assert res["markets"]["US"]["limitations"]
+    assert "order_bids" in res["data_shapes"]["equity_book"]
+    assert "provenance" in res["observation_contract"]
     assert "tag" in res
 
 

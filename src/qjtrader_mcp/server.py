@@ -129,6 +129,13 @@ def _blocking_depth(symbol: str, levels: int, seconds: float) -> dict[str, Any]:
                 book = {
                     "bids": (data.get("bids") or [])[:levels],
                     "asks": (data.get("asks") or [])[:levels],
+                    "odd_lot_bids": (data.get("odd_lot_bids") or [])[:levels],
+                    "odd_lot_asks": (data.get("odd_lot_asks") or [])[:levels],
+                    "special_lot_bids": (data.get("special_lot_bids") or [])[:levels],
+                    "special_lot_asks": (data.get("special_lot_asks") or [])[:levels],
+                    "order_bids": data.get("order_bids") or [],
+                    "order_asks": data.get("order_asks") or [],
+                    "meta": msg.get("meta") or {},
                 }
     return {"user": user, "symbol": symbol, "book": book}
 
@@ -187,10 +194,11 @@ async def get_quote(symbols: list[str], seconds: float = 4.0) -> dict[str, Any]:
 
 @mcp.tool()
 async def get_depth(symbol: str, levels: int = 5, seconds: float = 4.0) -> dict[str, Any]:
-    """Get the Level-2 order book (price/size by level) for a single symbol.
+    """Get all Level-2 views for a single symbol.
 
-    On consolidated equity symbols (e.g. "CA:RY") each level is tagged with its
-    venue; use a venue-scoped symbol (e.g. "CA:RY.PT") for one exchange only.
+    Canadian equity results include rounded Top5, full-size odd/special lots,
+    entitled QJ/TMX order-level TL2 rows, and source timing/provenance. Use a venue-scoped
+    symbol such as "CA:RY.PT" to isolate one exchange.
     """
     levels = min(max(levels, 1), 20)
     seconds = min(max(seconds, 1.0), 15.0)

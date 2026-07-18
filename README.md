@@ -111,7 +111,9 @@ The console's "Connect your AI" panel generates these blocks pre-filled, includi
 `market_availability` also returns an `observation_contract` and source-aware
 `data_shapes`. Agents must preserve `null` or silence as "unquoted now," treat
 `orders`/`venues` on depth levels as optional, and never infer Greeks, NAV,
-contract terms, depth, or order authority from the security type alone.
+contract terms, depth, or order authority from the security type alone. Canadian
+`get_depth` results include rounded Top5, odd/special-lot views, entitled
+`order_bids`/`order_asks` QJ/TMX TL2 rows, and source timing/provenance.
 | `get_quote` | read | Top-of-book (best bid/ask) for one or more symbols |
 | `get_depth` | read | Level-2 order book for a symbol (venue-tagged on consolidated books) |
 | `watch` | read | Sample the live stream for a bounded window; returns a digest + last messages |
