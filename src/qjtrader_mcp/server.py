@@ -637,16 +637,27 @@ async def stop_run(run_id: str) -> dict[str, Any]:
 
 # --------------------------------------------------------------- meta tools
 @mcp.tool()
-def request_production_access(plane: str = "data", markets: list[str] | None = None,
-                              label: str = "") -> dict[str, Any]:
-    """Create a secret-free Gateway handoff for a human-approved access request.
-
-    This tool cannot promote the current credential, approve a request, create
-    a production secret, or bypass licensing. Open the returned URL and sign in.
-    """
+def access_status() -> dict[str, Any]:
+    """Show live products and requests for the browser-signed-in QJ user."""
     try:
+        return {"tag": _guard.tag(), **qjtrader.AccessClient().status()}
+    except (RuntimeError, OSError) as e:
+        return {"tag": _guard.tag(), "status": "login_required", "error": str(e),
+                "next": "Run `qjtrader login`; trading keys intentionally do not grant user/admin authority."}
+
+
+@mcp.tool()
+def request_production_access(plane: str = "data", markets: list[str] | None = None,
+                              label: str = "", use_case: str = "") -> dict[str, Any]:
+    """Submit a user access request; approval and authority remain human-controlled."""
+    try:
+        result = qjtrader.AccessClient().request(plane=plane, markets=markets or [],
+                                                 label=label, use_case=use_case)
+        return {"tag": _guard.tag(), **result,
+                "safety": "The request entered human review. No market or order authority changed."}
+    except RuntimeError:
         url = qjtrader.production_access_url(plane=plane, markets=markets or (), label=label)
-    except ValueError as e:
+    except (ValueError, OSError) as e:
         return {"tag": _guard.tag(), "error": str(e)}
     return {
         "tag": _guard.tag(),

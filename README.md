@@ -103,7 +103,8 @@ The console's "Connect your AI" panel generates these blocks pre-filled, includi
 |---|---|---|
 | `session_info` | read | Environment, whether order actions are allowed, endpoints, authenticated user. **Call first.** |
 | `market_availability` | read, offline | Product-by-product sandbox vs production data/order support, verified examples, and known gaps. **Call before assuming a product has depth or order authority.** |
-| `request_production_access` | human handoff | Builds a secret-free Gateway URL for a least-privilege request. It cannot approve, provision, promote, or reveal a key. |
+| `access_status` | human account read | Shows products and requests after `qjtrader login`; machine trading keys do not grant this authority. |
+| `request_production_access` | human request | Submits through the signed-in user API, or returns a safe browser handoff when login is absent. It cannot approve or promote itself. |
 | `search_universe` | read | Search current symbol forms and capability metadata by market or text |
 | `describe_instrument` | read | Describe one symbol, its product identity, venue scope, and available operations |
 
