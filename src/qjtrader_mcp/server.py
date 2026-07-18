@@ -637,6 +637,26 @@ async def stop_run(run_id: str) -> dict[str, Any]:
 
 # --------------------------------------------------------------- meta tools
 @mcp.tool()
+def request_production_access(plane: str = "data", markets: list[str] | None = None,
+                              label: str = "") -> dict[str, Any]:
+    """Create a secret-free Gateway handoff for a human-approved access request.
+
+    This tool cannot promote the current credential, approve a request, create
+    a production secret, or bypass licensing. Open the returned URL and sign in.
+    """
+    try:
+        url = qjtrader.production_access_url(plane=plane, markets=markets or (), label=label)
+    except ValueError as e:
+        return {"tag": _guard.tag(), "error": str(e)}
+    return {
+        "tag": _guard.tag(),
+        "status": "human_action_required",
+        "url": url,
+        "safety": "Sign in to Gateway, review the least-privilege scope, and submit it. A QJ admin must approve and provision production access separately.",
+    }
+
+
+@mcp.tool()
 async def search_universe(query: str = "", limit: int = 50) -> dict[str, Any]:
     """Search instruments visible to this credential and return capability-aware descriptions."""
     try:

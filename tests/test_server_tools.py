@@ -12,6 +12,7 @@ async def test_all_tools_registered():
     names = {t.name for t in await server.mcp.list_tools()}
     assert {
         "session_info", "market_availability", "get_quote", "get_depth", "watch", "list_orders",
+        "request_production_access",
         "place_order", "cancel_order", "replace_order", "cancel_all",
         "explain_symbol",
         # v2 research/analytics tools (plan §9.2)
@@ -28,6 +29,14 @@ async def test_market_availability_is_offline_and_describes_us_limits():
     res = await server.market_availability()
     assert res["markets"]["US"]["limitations"]
     assert "tag" in res
+
+
+def test_production_request_is_a_human_handoff_not_a_promotion():
+    from qjtrader_mcp import server
+    res = server.request_production_access("data", ["ca-equities"], "M3alpha CSU shadow")
+    assert res["status"] == "human_action_required"
+    assert "gateway.qjtrader.ai/credentials" in res["url"]
+    assert "secret" not in res["url"].lower()
 
 
 @pytest.mark.anyio
