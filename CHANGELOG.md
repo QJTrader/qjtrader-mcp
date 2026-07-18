@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.4
+
+- `get_depth` now returns price-aggregated, round/odd/special-lot, and QJ/TMX
+  order-level TL2 views together with feed provenance.
+- Requires `qjtrader>=0.5.6` for the matching availability contract.
+
 ## 0.4.2
 
 - Added payload-shape and observation-honesty guidance to `market_availability`
