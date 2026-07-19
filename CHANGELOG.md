@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.9
+
+- Clarified the positions-and-risk tool contract: weighted Desktop RiskPoints are monitoring
+  context, not raw share or contract caps; Gateway and directly comparable route checks remain
+  cloud pre-trade controls, with full broker/Desktop safeguards downstream.
+
 ## 0.4.8
 
 - Added agent-readable market-memory status and safe keep/stop recording tools.
