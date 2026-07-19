@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.5
+
+- Added `request_limit_change` for human-authorized, product-specific cloud API safeguard requests.
+- Requires `qjtrader>=0.5.7`; broker/Desktop limits remain a distinct read-only backstop.
+
 ## 0.4.4
 
 - `get_depth` now returns price-aggregated, round/odd/special-lot, and QJ/TMX

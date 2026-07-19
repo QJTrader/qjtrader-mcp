@@ -12,7 +12,7 @@ async def test_all_tools_registered():
     names = {t.name for t in await server.mcp.list_tools()}
     assert {
         "session_info", "market_availability", "get_quote", "get_depth", "watch", "list_orders",
-        "request_production_access",
+        "request_production_access", "request_limit_change",
         "place_order", "cancel_order", "replace_order", "cancel_all",
         "explain_symbol",
         # v2 research/analytics tools (plan §9.2)

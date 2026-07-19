@@ -105,6 +105,7 @@ The console's "Connect your AI" panel generates these blocks pre-filled, includi
 | `market_availability` | read, offline | Product-by-product sandbox vs production data/order support, verified examples, and known gaps. **Call before assuming a product has depth or order authority.** |
 | `access_status` | human account read | Shows products and requests after `qjtrader login`; machine trading keys do not grant this authority. |
 | `request_production_access` | human request | Requests account-level Data or Order Entry access through the signed-in user API, or returns a safe browser handoff when login is absent. It cannot approve, promote, or choose internal routes. |
+| `request_limit_change` | human request | Requests product-specific cloud API safeguards for a production key. Broker/Desktop risk controls remain independent and unchanged. |
 | `search_universe` | read | Search current symbol forms and capability metadata by market or text |
 | `describe_instrument` | read | Describe one symbol, its product identity, venue scope, and available operations |
 
@@ -118,7 +119,7 @@ contract terms, depth, or order authority from the security type alone. Canadian
 | `get_depth` | read | Level-2 order book for a symbol (venue-tagged on consolidated books) |
 | `watch` | read | Sample the live stream for a bounded window; returns a digest + last messages |
 | `list_orders` | read | Open orders + session state |
-| `get_positions` | read | Broker-truth positions (broker + fill = total), risk envelope + admserv hard caps, capital-required, order plane |
+| `get_positions` | read | Broker-truth positions (broker + fill = total), cloud-route and Desktop-profile safeguards, estimated capital in current positions, and order plane |
 | `place_order` | write | Submit a limit order and wait for a terminal state |
 | `cancel_order` | write | Cancel a working order by `cid` |
 | `replace_order` | write | Amend a working order's qty/price |

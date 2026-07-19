@@ -676,6 +676,21 @@ def request_production_access(plane: str = "data", markets: list[str] | None = N
 
 
 @mcp.tool()
+def request_limit_change(product: str, client_id: str = "", max_qty: int | None = None,
+                         max_open: int | None = None, msgs_per_sec: float | None = None,
+                         daily_qty: int | None = None, reason: str = "") -> dict[str, Any]:
+    """Request a production cloud API limit change; broker/desktop risk is unchanged."""
+    try:
+        result = qjtrader.AccessClient().request_limit_change(
+            product=product, client_id=client_id, max_qty=max_qty, max_open=max_open,
+            msgs_per_sec=msgs_per_sec, daily_qty=daily_qty, reason=reason)
+        return {"tag": _guard.tag(), **result}
+    except (RuntimeError, ValueError, OSError) as e:
+        return {"tag": _guard.tag(), "error": str(e),
+                "next": "Run `qjtrader login` to submit this human-authorized request."}
+
+
+@mcp.tool()
 async def search_universe(query: str = "", limit: int = 50) -> dict[str, Any]:
     """Search instruments visible to this credential and return capability-aware descriptions."""
     try:
