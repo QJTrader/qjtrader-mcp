@@ -117,6 +117,8 @@ contract terms, depth, or order authority from the security type alone. Canadian
 `order_bids`/`order_asks` QJ/TMX TL2 rows, and source timing/provenance.
 History and statistics also carry `source=synthetic|recorded|unavailable` plus
 availability. Production never substitutes generated bars when capture is absent.
+Production market memory follows attention: bars accumulate while a symbol is
+observed, while a continuous pin keeps a standing watch and richer event capture.
 | `get_quote` | read | Top-of-book (best bid/ask) for one or more symbols |
 | `get_depth` | read | Level-2 order book for a symbol (venue-tagged on consolidated books) |
 | `watch` | read | Sample the live stream for a bounded window; returns a digest + last messages |
@@ -130,6 +132,9 @@ availability. Production never substitutes generated bars when capture is absent
 | `read_events` | read | Order journal — cross-order event history; post-trade analysis & strategy debugging |
 | `get_history` | read | Historical OHLCV bars (1s/1m) with synthetic/recorded/unavailable provenance |
 | `get_stats` | read | Server digest plus the same history provenance (a digest, not a dump) |
+| `get_recording_status` | read | Explain whether a symbol is ready, observed now, or kept in continuous memory |
+| `keep_recording` | data setting | Keep an entitled production symbol recording after apps disconnect; cannot trade |
+| `stop_recording` | data setting | Remove continuous memory and return to automatic observation-driven bars |
 | `get_chain` | read | Options chain snapshot for an underlying/expiry (latest or historical) |
 | `compare` | read | Rank a digest metric (vwap/volume/realized_vol/spread_mean) across symbols |
 

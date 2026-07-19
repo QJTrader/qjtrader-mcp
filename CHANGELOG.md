@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.8
+
+- Added agent-readable market-memory status and safe keep/stop recording tools.
+- Recording pins create no order authority: they only keep an entitled production market-data
+  watch alive and return to automatic bar capture when removed.
+
 ## 0.4.7
 
 - `get_history` and `get_stats` now tell agents to branch on explicit synthetic, recorded, or

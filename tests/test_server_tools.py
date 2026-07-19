@@ -17,7 +17,7 @@ async def test_all_tools_registered():
         "explain_symbol",
         # v2 research/analytics tools (plan §9.2)
         "read_events", "get_history", "get_stats", "get_chain", "list_expiries",
-        "compare",
+        "compare", "get_recording_status", "keep_recording", "stop_recording",
         # v2 tier-3 experiment tools (plan §9.2 / §10.4)
         "run_backtest", "set_scenario", "start_paper_run", "run_status", "stop_run",
     } <= names
@@ -85,6 +85,15 @@ class _FakeClient:
     def expiries(self, underlying):
         return {"underlying": underlying, "expiries": ["202608", "202609", "202610"]}
 
+    def recording_status(self, symbol):
+        return {"symbol": symbol, "mode": "observed", "pinned": False}
+
+    def pin_recording(self, symbol):
+        return {"symbol": symbol, "mode": "continuous", "pinned": True}
+
+    def unpin_recording(self, symbol):
+        return {"symbol": symbol, "mode": "ready", "pinned": False}
+
 
 @pytest.mark.anyio
 async def test_read_events_and_history(monkeypatch):
@@ -96,6 +105,11 @@ async def test_read_events_and_history(monkeypatch):
     h = await server.get_history("MX:CGBU26", interval="1m")
     assert h["symbol"] == "MX:CGBU26" and h["bars"][0]["close"] == 1.0
     assert h["source"] == "recorded"
+
+    status = await server.get_recording_status("MX:CGBU26")
+    assert status["mode"] == "observed"
+    assert (await server.keep_recording("MX:CGBU26"))["pinned"] is True
+    assert (await server.stop_recording("MX:CGBU26"))["pinned"] is False
 
 
 @pytest.mark.anyio

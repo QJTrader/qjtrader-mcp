@@ -476,6 +476,51 @@ async def get_stats(symbol: str, interval: str = "1m",
 
 
 @mcp.tool()
+async def get_recording_status(symbol: str) -> dict[str, Any]:
+    """Explain how QJ currently remembers `symbol`.
+
+    Production returns `ready`, `observed`, or `continuous`, the available
+    recorded date range, and whether richer market events are retained.
+    Sandbox history is regenerated and never stored. Read-only.
+    """
+    try:
+        res = await anyio.to_thread.run_sync(lambda: _client().recording_status(symbol))
+    except QJError as e:
+        return {"tag": _guard.tag(), "error": str(e)}
+    return {"tag": _guard.tag(), **res}
+
+
+@mcp.tool()
+async def keep_recording(symbol: str) -> dict[str, Any]:
+    """Keep a production symbol in continuous QJ memory.
+
+    This is not an order and cannot trade. It creates a standing market-data
+    watch after apps disconnect and retains richer market events, subject to
+    the key's entitlement and recording limit. Sandbox refuses it because its
+    history is regenerated.
+    """
+    try:
+        res = await anyio.to_thread.run_sync(lambda: _client().pin_recording(symbol))
+    except QJError as e:
+        return {"tag": _guard.tag(), "error": str(e)}
+    return {"tag": _guard.tag(), **res}
+
+
+@mcp.tool()
+async def stop_recording(symbol: str) -> dict[str, Any]:
+    """Remove a continuous-memory pin.
+
+    QJ still captures lightweight bars whenever a user or agent subsequently
+    observes the symbol. This does not affect trading or existing history.
+    """
+    try:
+        res = await anyio.to_thread.run_sync(lambda: _client().unpin_recording(symbol))
+    except QJError as e:
+        return {"tag": _guard.tag(), "error": str(e)}
+    return {"tag": _guard.tag(), **res}
+
+
+@mcp.tool()
 async def get_chain(underlying: str, expiry: str,
                     at: str | None = None) -> dict[str, Any]:
     """Options chain snapshot for an `underlying` at an `expiry` month.
