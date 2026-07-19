@@ -422,10 +422,11 @@ async def get_positions() -> dict[str, Any]:
     - `account_financials` — broker morning account value and related fields.
       Account value supports capital monitoring but is not guaranteed cash
       available or buying power; those remain empty unless supplied authoritatively.
-    - `envelope` / `admserv_limits` — the caps an order is checked against; admserv
-      values are broker/Desktop safeguards. Futures risk-point values are weighted
-      exposure, not raw contract counts, so they cannot be compared one-for-one with
-      the cloud quantity caps.
+    - `envelope` — the limits enforced by the cloud order path.
+    - `admserv_limits` — directly comparable futures size/open-order route fields
+      are cloud prechecks. Equity/futures RiskPoints are weighted portfolio exposure,
+      not raw per-symbol quantity, so those rows remain monitoring context until
+      Desktop-weighting parity exists. Full downstream safeguards operate independently.
     - `capital_required` — margin the current futures book ties up.
     - `orders_env` — the order plane (`sandbox`/`paper`/`shadow`/`real`). On a
       simulated plane there is no broker book: `positions_detail` is fill-only

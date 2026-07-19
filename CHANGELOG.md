@@ -15,7 +15,9 @@
 ## 0.4.5
 
 - Added `request_limit_change` for human-authorized, product-specific cloud API safeguard requests.
-- Requires `qjtrader>=0.5.7`; broker/Desktop limits remain a distinct read-only backstop.
+- Requires `qjtrader>=0.5.7`; directly comparable route size/open-order fields remain cloud
+  prechecks, while weighted broker/Desktop RiskPoints are monitoring context and downstream
+  legacy safeguards remain independent.
 
 ## 0.4.4
 
