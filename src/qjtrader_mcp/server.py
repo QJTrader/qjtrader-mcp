@@ -705,8 +705,9 @@ def explain_symbol(symbol: str) -> dict[str, Any]:
 
 @mcp.tool()
 async def session_info() -> dict[str, Any]:
-    """Report the current environment, whether live order actions are enabled,
-    the endpoints in use, and the authenticated principal. Call this first."""
+    """Report authoritative environments and this key's active Data products,
+    Order Entry products and trading accounts. Also reports whether live order
+    actions are enabled. Call this first."""
     declared = _guard.environment()
     info: dict[str, Any] = {
         "declared_environment": declared,

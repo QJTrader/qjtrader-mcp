@@ -101,7 +101,7 @@ The console's "Connect your AI" panel generates these blocks pre-filled, includi
 
 | Tool | Kind | Description |
 |---|---|---|
-| `session_info` | read | Environment, whether order actions are allowed, endpoints, authenticated user. **Call first.** |
+| `session_info` | read | Authoritative environment plus the Data products, Order Entry products, and trading accounts active on this key. **Call first.** |
 | `market_availability` | read, offline | Product-by-product sandbox vs production data/order support, verified examples, and known gaps. **Call before assuming a product has depth or order authority.** |
 | `access_status` | human account read | Shows products and requests after `qjtrader login`; machine trading keys do not grant this authority. |
 | `request_production_access` | human request | Submits through the signed-in user API, or returns a safe browser handoff when login is absent. It cannot approve or promote itself. |
