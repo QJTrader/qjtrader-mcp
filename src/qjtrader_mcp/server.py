@@ -657,7 +657,7 @@ def access_status() -> dict[str, Any]:
 @mcp.tool()
 def request_production_access(plane: str = "data", markets: list[str] | None = None,
                               label: str = "", use_case: str = "") -> dict[str, Any]:
-    """Submit a user access request; approval and authority remain human-controlled."""
+    """Request account-level Data or Order Entry access; approval remains human-controlled."""
     try:
         result = qjtrader.AccessClient().request(plane=plane, markets=markets or [],
                                                  label=label, use_case=use_case)
