@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.6
+
+- `get_history` and `get_stats` now tell agents to branch on explicit synthetic, recorded, or
+  unavailable provenance. Missing production capture is an empty honest result, never generated data.
+- Requires `qjtrader>=0.5.8` for the matching live-sampled availability contract.
+
 ## 0.4.5
 
 - Added `request_limit_change` for human-authorized, product-specific cloud API safeguard requests.

@@ -30,6 +30,7 @@ async def test_market_availability_is_offline_and_describes_us_limits():
     assert res["markets"]["US"]["limitations"]
     assert "order_bids" in res["data_shapes"]["equity_book"]
     assert "provenance" in res["observation_contract"]
+    assert "never falls back" in res["observation_contract"]["history"]
     assert "tag" in res
 
 
@@ -69,7 +70,8 @@ class _FakeClient:
         return {"events": [{"cid": "a", "status": "filled"}], "cursor": "t9"}
 
     def history(self, sym, interval, start, end, limit):
-        return {"symbol": sym, "interval": interval, "bars": [{"close": 1.0}]}
+        return {"symbol": sym, "interval": interval, "source": "recorded",
+                "availability": "available", "bars": [{"close": 1.0}]}
 
     def stats(self, sym, interval, window):
         vwap = {"A": 10.0, "B": 5.0}.get(sym, 1.0)
@@ -93,6 +95,7 @@ async def test_read_events_and_history(monkeypatch):
     assert ev["events"][0]["cid"] == "a" and ev["cursor"] == "t9" and "tag" in ev
     h = await server.get_history("MX:CGBU26", interval="1m")
     assert h["symbol"] == "MX:CGBU26" and h["bars"][0]["close"] == 1.0
+    assert h["source"] == "recorded"
 
 
 @pytest.mark.anyio

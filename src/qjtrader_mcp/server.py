@@ -446,8 +446,10 @@ async def get_history(symbol: str, interval: str = "1m", start: str | None = Non
     """Historical OHLCV bars for a symbol (interval "1s" or "1m").
 
     `start`/`end` are ISO-8601 or epoch seconds (default: the last hour). Sandbox
-    credentials get deterministic, reproducible synthetic days — rerun the same
-    range after a code change and get identical bars. Read-only.
+    credentials get deterministic, reproducible synthetic days. Production
+    returns only captured observations: inspect `source` (`recorded` or
+    `unavailable`) and `availability`; it never falls back to generated bars.
+    Read-only.
     """
     limit = min(max(limit, 1), 5000)
     try:
@@ -462,8 +464,9 @@ async def get_history(symbol: str, interval: str = "1m", start: str | None = Non
 async def get_stats(symbol: str, interval: str = "1m",
                     window: float = 3600.0) -> dict[str, Any]:
     """Server-computed digest for a symbol over the last `window` seconds:
-    VWAP, spread distribution, volume, realized vol, OHLC. A digest, not a dump —
-    drill down with `get_history`. Read-only."""
+    VWAP, spread distribution, volume, realized vol, OHLC. The result carries
+    the same synthetic/recorded/unavailable provenance as `get_history`. A
+    digest, not a dump — drill down with `get_history`. Read-only."""
     try:
         res = await anyio.to_thread.run_sync(
             lambda: _client().stats(symbol, interval, window))
