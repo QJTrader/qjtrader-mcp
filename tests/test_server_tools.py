@@ -67,8 +67,12 @@ async def test_run_status_empty(monkeypatch):
 
 
 class _FakeClient:
-    def events(self, since, limit):
+    def events(self, since, limit, cursor=None):
         return {"events": [{"cid": "a", "status": "filled"}], "cursor": "t9"}
+
+    def executions(self, since, limit, cursor=None):
+        return {"executions": [{"execution_id": "E1", "last_qty": 2}],
+                "next_cursor": "opaque"}
 
     def history(self, sym, interval, start, end, limit):
         return {"symbol": sym, "interval": interval, "source": "recorded",
@@ -103,6 +107,8 @@ async def test_read_events_and_history(monkeypatch):
 
     ev = await server.read_events()
     assert ev["events"][0]["cid"] == "a" and ev["cursor"] == "t9" and "tag" in ev
+    trades = await server.list_trades()
+    assert trades["executions"][0]["execution_id"] == "E1"
     h = await server.get_history("MX:CGBU26", interval="1m")
     assert h["symbol"] == "MX:CGBU26" and h["bars"][0]["close"] == 1.0
     assert h["source"] == "recorded"

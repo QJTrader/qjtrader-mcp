@@ -390,17 +390,38 @@ async def list_orders() -> dict[str, Any]:
 
 # ----------------------------------------------------- analytics/research tools
 @mcp.tool()
-async def read_events(since: str | None = None, limit: int = 200) -> dict[str, Any]:
+async def read_events(since: str | None = None, limit: int = 200,
+                      cursor: str | None = None) -> dict[str, Any]:
     """Read this credential's order journal — the cross-order event history.
 
     The single highest-leverage research tool: post-trade analysis and debugging
     the strategy you wrote ("14 rejects, all price-band violations at the open").
-    `since` is an ISO-8601 ts cursor (pass back the returned `cursor` to page
-    forward). Read-only; works in every environment.
+    For polling, pass `since` as an ISO-8601 timestamp. For collision-safe
+    pagination, pass the returned `next_cursor` back as `cursor`. Read-only;
+    works in every environment.
     """
     limit = min(max(limit, 1), 1000)
     try:
-        res = await anyio.to_thread.run_sync(lambda: _client().events(since, limit))
+        res = await anyio.to_thread.run_sync(
+            lambda: _client().events(since, limit, cursor))
+    except QJError as e:
+        return {"tag": _guard.tag(), "error": str(e)}
+    return {"tag": _guard.tag(), **res}
+
+
+@mcp.tool()
+async def list_trades(since: str | None = None, limit: int = 200,
+                      cursor: str | None = None) -> dict[str, Any]:
+    """List individual fills and broker cancel/correct adjustments (read-only).
+
+    Unlike `list_orders`, which is the current working set, this is the trade
+    log: every partial fill remains a separate execution with account, price,
+    quantity, execution identity, and strategy/run attribution.
+    """
+    limit = min(max(limit, 1), 1000)
+    try:
+        res = await anyio.to_thread.run_sync(
+            lambda: _client().executions(since, limit, cursor))
     except QJError as e:
         return {"tag": _guard.tag(), "error": str(e)}
     return {"tag": _guard.tag(), **res}

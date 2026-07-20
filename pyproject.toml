@@ -20,7 +20,7 @@ classifiers = [
     "Topic :: Office/Business :: Financial :: Investment",
 ]
 dependencies = [
-    "qjtrader>=0.5.13",
+    "qjtrader>=0.5.16",
     "mcp>=1.2.0",
 ]
 

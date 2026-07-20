@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.12
+
+- Added `list_trades` as the execution-level counterpart to working orders and positions.
+- Added opaque cursor support to `read_events` so equal-timestamp events are not skipped.
+- Requires `qjtrader>=0.5.16` for the dedicated execution projection.
+
 ## 0.4.11
 
 - Added provider-neutral US Treasury futures explanations and verified availability for

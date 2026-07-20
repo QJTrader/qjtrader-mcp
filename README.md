@@ -126,6 +126,7 @@ observed, while a continuous pin keeps a standing watch and richer event capture
 | `get_depth` | read | Level-2 order book for a symbol (venue-tagged on consolidated books) |
 | `watch` | read | Sample the live stream for a bounded window; returns a digest + last messages |
 | `list_orders` | read | Open orders + session state |
+| `list_trades` | read | Individual fills and broker cancel/correct adjustments, with account and strategy-run attribution |
 | `get_positions` | read | Broker-truth positions (broker + fill = total), cloud-route and Desktop-profile safeguards, estimated capital in current positions, and order plane |
 | `place_order` | write | Submit a limit order and wait for a terminal state |
 | `cancel_order` | write | Cancel a working order by `cid` |
