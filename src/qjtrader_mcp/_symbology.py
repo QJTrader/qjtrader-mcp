@@ -13,6 +13,7 @@ from typing import Any
 # Security-type prefixes (everything except a plain stock/ETF).
 _TYPE_PREFIX = {
     "/": "future",
+    "@": "future",
     "#": "option (equity or on a future)",
     "$": "foreign exchange",
     "%": "strategy / spread",
@@ -50,7 +51,14 @@ _VENUE = {
 _NAMESPACE = {
     "CA": "Canadian equities (consolidated unless a venue suffix is given)",
     "MX": "Montréal Exchange derivatives (futures & options)",
-    "US": "US equities",
+    "US": "US equities, ETFs, listed options, and selected futures",
+}
+
+_US_FUTURE_ROOT = {
+    "ES": "S&P 500 E-mini future",
+    "US": "30-Year U.S. Treasury Bond future",
+    "TY": "10-Year U.S. Treasury Note future",
+    "FV": "5-Year U.S. Treasury Note future",
 }
 
 _REFERENCE = "https://docs.qjtrader.ai/docs/ai/symbology"
@@ -101,6 +109,15 @@ def explain(symbol: str) -> dict[str, Any]:
     if "." in body:
         root, venue = body.rsplit(".", 1)
     out["root"] = root.strip()
+    if out.get("namespace") == "US" and type_prefix == "@":
+        import re
+        match = re.fullmatch(r"([A-Z]+)([FGHJKMNQUVXZ])(\d{2})", root.strip().upper())
+        if match:
+            contract_root, month_code, year = match.groups()
+            out["contract_root"] = contract_root
+            out["contract_name"] = _US_FUTURE_ROOT.get(contract_root, "selected US future")
+            out["contract_month_code"] = month_code
+            out["contract_year"] = 2000 + int(year)
     if venue:
         out["venue"] = venue
         out["venue_meaning"] = _VENUE.get(

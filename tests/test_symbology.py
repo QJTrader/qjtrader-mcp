@@ -42,6 +42,21 @@ def test_mx_namespace_future():
     assert r["root"] == "CRAU26"
 
 
+def test_us_treasury_future_prefix_and_names():
+    expected = {
+        "US:@USU26": ("US", "30-Year U.S. Treasury Bond future"),
+        "US:@TYU26": ("TY", "10-Year U.S. Treasury Note future"),
+        "US:@FVU26": ("FV", "5-Year U.S. Treasury Note future"),
+    }
+    for symbol, (root, name) in expected.items():
+        result = _symbology.explain(symbol)
+        assert result["security_type"] == "future"
+        assert result["contract_root"] == root
+        assert result["contract_name"] == name
+        assert result["contract_month_code"] == "U"
+        assert result["contract_year"] == 2026
+
+
 def test_empty_symbol_gives_help():
     r = _symbology.explain("")
     assert "help" in r

@@ -16,6 +16,9 @@ it from Claude Code, Claude Desktop, or any MCP-capable client:
 > *"Check market availability, then compare CA:RY, MX:CRAU26, and US:@ESU26 in the sandbox.
 > Show the books and explain which production permissions would be separate."*
 
+Verified selected US futures also include the canonical Treasury symbols `US:@USU26`
+(30-Year Bond), `US:@TYU26` (10-Year Note), and `US:@FVU26` (5-Year Note).
+
 > **Verifiable releases.** `qjtrader-mcp` is published straight from this repository via [PyPI Trusted
 > Publishing](https://docs.pypi.org/trusted-publishers/) with signed [PEP 740](https://peps.python.org/pep-0740/)
 > provenance — no manual uploads, no stored tokens. Before you let an agent install it, you (or the agent)

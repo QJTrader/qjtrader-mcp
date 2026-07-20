@@ -31,6 +31,7 @@ async def test_market_availability_is_offline_and_describes_us_limits():
     assert "order_bids" in res["data_shapes"]["equity_book"]
     assert "provenance" in res["observation_contract"]
     assert "never falls back" in res["observation_contract"]["history"]
+    assert "US:@TYU26" in " ".join(res["markets"]["US"]["verified"])
     assert "tag" in res
 
 

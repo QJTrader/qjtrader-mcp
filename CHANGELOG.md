@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.10
+
+- Added provider-neutral US Treasury futures explanations and verified availability for
+  `US:@USU26`, `US:@TYU26`, and `US:@FVU26`.
+- Corrected the cloud `@` marker so `explain_symbol` classifies selected US futures as
+  futures instead of stock-like instruments.
+
 ## 0.4.9
 
 - Clarified the positions-and-risk tool contract: weighted Desktop RiskPoints are monitoring
