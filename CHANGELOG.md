@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.10
+## 0.4.11
 
 - Added provider-neutral US Treasury futures explanations and verified availability for
   `US:@USU26`, `US:@TYU26`, and `US:@FVU26`.
