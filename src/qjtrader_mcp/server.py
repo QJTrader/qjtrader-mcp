@@ -197,7 +197,8 @@ async def get_depth(symbol: str, levels: int = 5, seconds: float = 4.0) -> dict[
     """Get all Level-2 views for a single symbol.
 
     Canadian equity results include rounded Top5, full-size odd/special lots,
-    entitled QJ/TMX order-level TL2 rows, and source timing/provenance. Use a venue-scoped
+    entitled QJ/TMX order-level TL2 rows, and source timing/provenance, including
+    `meta.transport_age_ms`, `meta.stale_reason`, and `meta.stale`. Use a venue-scoped
     symbol such as "CA:RY.PT" to isolate one exchange.
     """
     levels = min(max(levels, 1), 20)

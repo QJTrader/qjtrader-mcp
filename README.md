@@ -117,7 +117,9 @@ The console's "Connect your AI" panel generates these blocks pre-filled, includi
 `orders`/`venues` on depth levels as optional, and never infer Greeks, NAV,
 contract terms, depth, or order authority from the security type alone. Canadian
 `get_depth` results include rounded Top5, odd/special-lot views, entitled
-`order_bids`/`order_asks` QJ/TMX TL2 rows, and source timing/provenance.
+`order_bids`/`order_asks` QJ/TMX TL2 rows, and source timing/provenance. Check
+`meta.stale` and `meta.transport_age_ms` before acting: a connected source can still be delayed by
+an uplink backlog, reported as `meta.stale_reason="transport_backlog"`.
 History and statistics also carry `source=synthetic|recorded|unavailable` plus
 availability. Production never substitutes generated bars when capture is absent.
 Production market memory follows attention: bars accumulate while a symbol is
