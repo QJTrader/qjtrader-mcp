@@ -769,6 +769,30 @@ def request_limit_change(product: str, client_id: str = "", max_qty: int | None 
 
 
 @mcp.tool()
+def get_feed_limits(user: str = "") -> dict[str, Any]:
+    """Read a feed user's effective quotas using a dedicated data-admin key."""
+    try:
+        return {"tag": _guard.tag(), **_client().feed_limits(user or None)}
+    except (QJError, ValueError, OSError) as e:
+        return {"tag": _guard.tag(), "error": str(e),
+                "safety": "Requires a separate qj-data-feed/data-admin credential; normal data and trading keys cannot self-elevate."}
+
+
+@mcp.tool()
+def set_feed_limits(user: str = "", max_symbols: int | None = None,
+                    max_connections: int | None = None) -> dict[str, Any]:
+    """Set one feed user's quotas; QJ enforces the data-admin scope server-side."""
+    try:
+        result = _client().set_feed_limits(
+            user or None, max_symbols=max_symbols,
+            max_connections=max_connections)
+        return {"tag": _guard.tag(), **result}
+    except (QJError, ValueError, OSError) as e:
+        return {"tag": _guard.tag(), "error": str(e),
+                "safety": "No limit changed. A dedicated qj-data-feed/data-admin credential is required."}
+
+
+@mcp.tool()
 async def search_universe(query: str = "", limit: int = 50) -> dict[str, Any]:
     """Search instruments visible to this credential and return capability-aware descriptions."""
     try:

@@ -13,6 +13,7 @@ async def test_all_tools_registered():
     assert {
         "session_info", "market_availability", "get_quote", "get_depth", "watch", "list_orders",
         "request_production_access", "request_limit_change",
+        "get_feed_limits", "set_feed_limits",
         "place_order", "cancel_order", "replace_order", "cancel_all",
         "explain_symbol",
         # v2 research/analytics tools (plan §9.2)
@@ -67,6 +68,14 @@ async def test_run_status_empty(monkeypatch):
 
 
 class _FakeClient:
+    def feed_limits(self, user=None):
+        return {"user": user or "admin", "limits": {"max_symbols": 250,
+                                                       "max_connections": 3}}
+
+    def set_feed_limits(self, user=None, **limits):
+        return {"user": user or "admin", "limits": {
+            key: value for key, value in limits.items() if value is not None}}
+
     def events(self, since, limit, cursor=None):
         return {"events": [{"cid": "a", "status": "filled"}], "cursor": "t9"}
 
@@ -98,6 +107,14 @@ class _FakeClient:
 
     def unpin_recording(self, symbol):
         return {"symbol": symbol, "mode": "ready", "pinned": False}
+
+
+def test_feed_admin_limit_tools_are_explicit_and_scoped(monkeypatch):
+    from qjtrader_mcp import server
+    monkeypatch.setattr(server, "_client", lambda: _FakeClient())
+    assert server.get_feed_limits("strategy-client")["limits"]["max_symbols"] == 250
+    changed = server.set_feed_limits("strategy-client", max_symbols=300)
+    assert changed["limits"] == {"max_symbols": 300}
 
 
 @pytest.mark.anyio
